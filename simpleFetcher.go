@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -29,11 +30,15 @@ func defaultFetcher(domainName string) simpleFetcher {
 	return simpleFetcher{domainName, httpClient, nil, 10}
 }
 
-//TODO: NEED TO CHECK DOMAIN
 func (f simpleFetcher) getURLContent(url url.URL) (*http.Response, error) {
 	var err error
 	redirections := 0
 	nextLocation := &url
+
+	if !strings.EqualFold(url.Hostname(), f.domainName) {
+		// Should never enter here if system behaves correctly
+		log.Fatal("Requested an URL outside domain")
+	}
 
 	for redirections < f.maxRedirections {
 		resp, eR := f.httpClient.Get(nextLocation.String())
