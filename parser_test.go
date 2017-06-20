@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"io"
-	"io/ioutil"
 	"log"
 	"testing"
 )
@@ -21,12 +18,4 @@ func TestGetTags(t *testing.T) {
 	result := getAllTagAttr(attrs, file)
 
 	log.Printf("RESULT: %v", result)
-}
-
-func readFileFromDisk(filename, rootPath string) (io.Reader, error) {
-	bytesRead, err := ioutil.ReadFile(rootPath + filename)
-	if err != nil {
-		return nil, err
-	}
-	return bytes.NewReader(bytesRead), nil
 }
