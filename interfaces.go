@@ -35,13 +35,15 @@ type fetcher interface {
 }
 
 type crawler interface {
+	crawl() (sitemap, error)
 }
 
 //Stores urls from a domains and can print them.
-type Sitemap interface {
+type sitemap interface {
 	// Add an url for printing
 	addURL() string // any advantage with URL data type?
 	// Print the sitemap to a Writer. (TODO: Check if it allows print to console
 	// and file)
 	printSiteMap(io.Writer)
+	numberOfLinks() int
 }
