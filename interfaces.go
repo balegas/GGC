@@ -22,10 +22,12 @@ type urlFrontier interface {
 }
 
 type urlStore interface {
-	// Returns true if values does not exist in cache or is different.
-	put(k string, v io.Reader) bool
-	// Returns the value of the key in bytes and ok, or empty []byte and an error.
-	get(string) (io.Reader, error)
+	// Returns true if values does not exist or replaced the previous value.
+	// Return false on error.
+	put(k string, content []byte) bool
+	// Returns the stored page (can be full byte content or just the hash)
+	// return true if value exists, false otherwise.
+	get(k string) ([]byte, bool)
 }
 
 type accessPolicyChecker interface {

@@ -15,7 +15,7 @@ func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string, dur
 
 	fe := defaultFetcher(p)
 	fr := newStackFrontier(defaultStackSize)
-	s := newDummyURLStore()
+	s := newInMemoryURLStore()
 	initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
 	return c
 }

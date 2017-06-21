@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"time"
@@ -65,20 +65,22 @@ func (c *basicCrawler) crawl() (sitemap, error) {
 			log.Printf("newURLS %s", newURLs)
 			if err != nil {
 				log.Printf("Error processing page: %s", err)
-				//Mark as visited
-				c.store.put(curl, bytes.NewReader([]byte{}))
+				//Mark as visited with empty value
+				c.markProcessed(curl, []byte{})
 				continue
 			} else {
-				c.store.put(curl, body)
+				bodyInBytes, _ := ioutil.ReadAll(body)
+				c.markProcessed(curl, bodyInBytes)
 				for _, u := range newURLs {
+					//Must make url cannonical before checking that can be processed.
 					curli, _ := getCanonicalURLString(u, nextURL)
-					if !c.visited(curli) && c.canProcess(curli) {
+					if c.canProcess(curli) {
 						log.Printf("Added to frontier %s", curli)
 						c.frontier.addURLString(curli)
 					}
 				}
 			}
-			c.markProcessed(curl)
+
 		}
 	}
 	log.Printf("Finished")
@@ -86,19 +88,18 @@ func (c *basicCrawler) crawl() (sitemap, error) {
 }
 func (c *basicCrawler) canProcess(curl string) bool {
 	//TODO: Add cache verification
+	if _, exists := c.store.get(curl); exists {
+		return false
+	}
 	return c.rules.checkURL(curl)
 }
 
+/*
 func (c *basicCrawler) visited(curl string) bool {
 	//TODO: Integrate URL Store
 	return false
 }
-
-func (c *basicCrawler) storeURL(curl string, content string) bool {
-	//TODO: Integrate URL Store.
-	//TODO: Hash content
-	return false
-}
+*/
 
 func (c *basicCrawler) findURLLinksGetBody(url *url.URL) ([]string, io.Reader, error) {
 	content, err := c.fetcher.getURLContent(url)
@@ -111,7 +112,6 @@ func (c *basicCrawler) findURLLinksGetBody(url *url.URL) ([]string, io.Reader, e
 	return getAllTagAttr(crawlTags, content.Body), content.Body, nil
 }
 
-func (c *basicCrawler) markProcessed(curl string) []string {
-	//TODO
-	return nil
+func (c *basicCrawler) markProcessed(curl string, body []byte) {
+	c.store.put(curl, body)
 }
