@@ -1,32 +1,40 @@
 package main
 
-import "errors"
+//
+
+import (
+	"errors"
+
+	S "github.com/junpengxiao/Stack"
+)
+
+type stack interface {
+	Push(value interface{})
+	Pop() (interface{}, error)
+	Len() int
+}
 
 //FIXME: How to use unexported types properly?
 type stackFrontier struct {
-	urlStack []string
+	urlStack stack
 }
 
 var errEmptyFrontier = errors.New("no more urls in stack")
 
 func newStackFrontier(baseSize uint) *stackFrontier {
-	return &stackFrontier{urlStack: make([]string, 0, baseSize)}
+	s := S.NewStack(1024)
+	return &stackFrontier{urlStack: s}
 }
 
 func (f *stackFrontier) addURL(url string) {
-	f.urlStack = append(f.urlStack, url)
+	f.urlStack.Push(url)
 }
 
-//pop the top item out, if stack is empty, will return ErrEmptyStack decleared above
 func (f *stackFrontier) nextURL() (string, error) {
-	if !f.isEmpty() {
-		URL := f.urlStack[len(f.urlStack)-1]
-		f.urlStack = f.urlStack[:len(f.urlStack)-1]
-		return URL, nil
-	}
-	return "", errEmptyFrontier
+	ret, err := f.urlStack.Pop()
+	return ret.(string), err
 }
 
 func (f *stackFrontier) isEmpty() bool {
-	return len(f.urlStack) == 0
+	return f.urlStack.Len() <= 0
 }
