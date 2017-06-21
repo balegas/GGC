@@ -6,21 +6,20 @@ import (
 	"time"
 )
 
-const defaultStackSize = 1024
-
-func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string, duration time.Duration) crawler {
-	c := newBasicCrawler()
-	p := newCheckDomainPolicy()
-	initCheckDomainPolicy(p, domainNames)
-
-	fe := defaultFetcher(p)
-	fr := newStackFrontier(defaultStackSize)
-	s := newInMemoryURLStore()
-	initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
-	return c
+/*
+func TestCrawlerOnWeb(t *testing.T) {
+	domainNames := []string{"gatofedorento.blogspot.pt", "www.gatofedorento.blogspot.pt"}
+	TenSeconds := time.Duration(10) * time.Second
+	c := newBasicCrawlerWithDomainPolicy("GGC", domainNames, TenSeconds)
+	nilSitemap, error := c.crawl()
+	if error != nil {
+		t.Fail()
+	}
+	log.Printf("%s", nilSitemap)
 }
+*/
 
-func TestBasicCrawlerWithNoLinks(t *testing.T) {
+func TestBasicCrawlerMock(t *testing.T) {
 	//TODO: Does not accept subdomains
 	startMock()
 	defer endMock()

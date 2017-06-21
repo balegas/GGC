@@ -5,9 +5,12 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"time"
 
 	httpmock "gopkg.in/jarcoal/httpmock.v1"
 )
+
+const defaultStackSize = 1024
 
 func readFileFromDisk(filename string) (io.Reader, error) {
 	bytesRead, err := ioutil.ReadFile(filename)
@@ -25,4 +28,16 @@ func setUpFakePage(pageLocation, pageFile string) {
 	}
 	log.Fatalf("Error loading pageFile %v", pageFile)
 
+}
+
+func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string, duration time.Duration) crawler {
+	c := newBasicCrawler()
+	p := newCheckDomainPolicy()
+	initCheckDomainPolicy(p, domainNames)
+
+	fe := defaultFetcher(p)
+	fr := newStackFrontier(defaultStackSize)
+	s := newInMemoryURLStore()
+	initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
+	return c
 }

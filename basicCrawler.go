@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/url"
+	"os"
 	"time"
 )
 
@@ -114,4 +115,22 @@ func (c *basicCrawler) findURLLinksGetBody(url *url.URL) ([]string, io.Reader, e
 
 func (c *basicCrawler) markProcessed(curl string, body []byte) {
 	c.store.put(curl, body)
+}
+
+func main() {
+
+	domainNames := os.Args[1:]
+	TenSeconds := time.Duration(10) * time.Second
+
+	c := newBasicCrawler()
+	p := newCheckDomainPolicy()
+	initCheckDomainPolicy(p, domainNames)
+
+	fe := defaultFetcher(p)
+	fr := newStackFrontier(defaultStackSize)
+	s := newInMemoryURLStore()
+	initBasicCrawler(c, domainNames, fe, p, fr, TenSeconds, s)
+
+	nilSitemap, _ := c.crawl()
+	log.Printf("%s", nilSitemap)
 }

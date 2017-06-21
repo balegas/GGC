@@ -73,5 +73,3 @@ func (f simpleFetcher) getURLContent(url *url.URL) (*http.Response, error) {
 	}
 	return nil, err
 }
-
-func main() {}
