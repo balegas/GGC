@@ -47,7 +47,6 @@ func initBasicCrawler(c *basicCrawler, seed []string, fet fetcher, rules accessP
 }
 
 func (c *basicCrawler) isTimeout() bool {
-	log.Printf("Checked timeout %v", c.finishTime.Before(time.Now()))
 	return c.finishTime.Before(time.Now())
 }
 
@@ -57,13 +56,14 @@ func (c *basicCrawler) crawl() (sitemap, error) {
 	var s sitemap
 	for !c.frontier.isEmpty() && !c.isTimeout() {
 		curl, err := c.frontier.nextURLString()
+		//log.Printf("NEXT  %s", curl)
 		if err != nil {
 			log.Fatal("Error dequeuing.")
 		}
 		if c.canProcess(curl) {
 			nextURL, _ := toURL(curl)
 			newURLs, body, err := c.findURLLinksGetBody(nextURL)
-			log.Printf("newURLS %s", newURLs)
+			//log.Printf("newURLS %s", newURLs)
 			if err != nil {
 				log.Printf("Error processing page: %s", err)
 				//Mark as visited with empty value
@@ -76,7 +76,7 @@ func (c *basicCrawler) crawl() (sitemap, error) {
 					//Must make url cannonical before checking that can be processed.
 					curli, _ := getCanonicalURLString(u, nextURL)
 					if c.canProcess(curli) {
-						log.Printf("Added to frontier %s", curli)
+						//log.Printf("Added to frontier %s", curli)
 						c.frontier.addURLString(curli)
 					}
 				}

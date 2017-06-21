@@ -38,6 +38,14 @@ func getAllTagAttr(tagAttr map[string]string, content io.Reader) []string {
 func getCanonicalURLString(urlString string, parentURL *url.URL) (string, error) {
 	//TODO: transform parameters to path segments; order arguments by index lex. order
 	//Full path
+
+	//Remove Anchors #
+	lastIndexOf := strings.LastIndex(urlString, "#")
+	for lastIndexOf > 0 {
+		urlString = urlString[:len(urlString)-(len(urlString)-lastIndexOf)]
+		lastIndexOf = strings.LastIndex(urlString, "#")
+	}
+
 	if strings.Index(urlString, "http://") == 0 || strings.Index(urlString, "https://") == 0 {
 		return urlString, nil
 	}
