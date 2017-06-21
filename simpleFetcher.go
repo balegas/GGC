@@ -67,6 +67,13 @@ func (f simpleFetcher) getURLContent(url *url.URL) (*http.Response, error) {
 		if resp.StatusCode == 200 {
 			return resp, nil
 		}
+
+		if resp.StatusCode == 404 {
+			log.Printf("Error 404 %v", nextLocation)
+			err = errorFetching
+			break
+		}
+
 	}
 	if redirections >= f.maxRedirections {
 		err = errorRedirection
