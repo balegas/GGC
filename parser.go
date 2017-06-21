@@ -41,8 +41,13 @@ func getCanonicalURLString(urlString string, parentURL *url.URL) (string, error)
 	if strings.Index(urlString, "http://") == 0 || strings.Index(urlString, "https://") == 0 {
 		return urlString, nil
 	}
+
+	if strings.Index(urlString, "/") == 0 {
+		return parentURL.Scheme + "://" + parentURL.Hostname() + urlString, nil
+	}
+
 	//Relative path
-	return parentURL.Scheme + "://" + parentURL.Hostname() + urlString, nil
+	return parentURL.Scheme + "://" + parentURL.Hostname() + "/" + urlString, nil
 
 }
 
