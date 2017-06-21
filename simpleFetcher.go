@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 var errorFetching = errors.New("Error fetching URL")
@@ -16,28 +15,30 @@ var errorRedirection = errors.New("Maximum redirections reached")
 //var ErrorLocation = errors.New("Location header is empty")
 
 type simpleFetcher struct {
-	domainName      string // must keep domain name to analyze redirects
+	rules           accessPolicyChecker
 	httpClient      *http.Client
 	ipAddress       net.IP
 	maxRedirections int
 }
 
-func defaultFetcher(domainName string) simpleFetcher {
+func defaultFetcher(rules accessPolicyChecker) simpleFetcher {
 	httpClient := &http.Client{CheckRedirect: func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}}
 
-	return simpleFetcher{domainName, httpClient, nil, 10}
+	return simpleFetcher{rules, httpClient, nil, 10}
 }
 
-func (f simpleFetcher) getURLContent(url url.URL) (*http.Response, error) {
+func (f simpleFetcher) getURLContent(url *url.URL) (*http.Response, error) {
+	//convert url back to normal form in case it was transformed.
+
 	var err error
 	redirections := 0
-	nextLocation := &url
+	nextLocation := url
+	nextLocationCanonical, _ := getCanonicalURLString(nextLocation.String(), url)
 
-	if !strings.EqualFold(url.Hostname(), f.domainName) {
-		// Should never enter here if system behaves correctly
-		log.Fatal("Requested an URL outside domain")
+	if !f.rules.checkURL(nextLocationCanonical) {
+		log.Fatal("Should not try to get a forbidden url.")
 	}
 
 	for redirections < f.maxRedirections {
@@ -50,12 +51,14 @@ func (f simpleFetcher) getURLContent(url url.URL) (*http.Response, error) {
 
 		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
 			location, _ := resp.Location()
-			if !strings.EqualFold(location.Hostname(), f.domainName) {
+
+			if !f.rules.checkURL(location.String()) {
 				err = errorDomain
 				break
 			} else {
 				redirections++
 				nextLocation = location
+				//log.Printf("Redirect to %v", nextLocation)
 				continue
 			}
 		}

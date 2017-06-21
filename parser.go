@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"net/url"
+	"strings"
 
 	"golang.org/x/net/html"
 )
@@ -33,8 +34,20 @@ func getAllTagAttr(tagAttr map[string]string, content io.Reader) []string {
 	return found
 }
 
-func getCanonicalURL(urlString string) (*url.URL, error) {
-	//TODO: transform parameters to path; order arguments by index lex. order
-	return url.Parse(urlString)
+//Not using error, can be removed
+func getCanonicalURLString(urlString string, parentURL *url.URL) (string, error) {
+	//TODO: transform parameters to path segments; order arguments by index lex. order
+	//Full path
+	if strings.Index(urlString, "http://") == 0 || strings.Index(urlString, "https://") == 0 {
+		return urlString, nil
+	}
+	//Relative path
+	return parentURL.Scheme + "://" + parentURL.Hostname() + urlString, nil
 
+}
+
+//Only function that converts to url.URL.
+func toURL(urlString string) (*url.URL, error) {
+	//TODO: transform canonicalURL back to URL.
+	return url.Parse(urlString)
 }

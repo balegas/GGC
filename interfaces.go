@@ -1,8 +1,10 @@
 package main
 
-import "io"
-
-//TODO: Check what should be exported/unexported
+import (
+	"io"
+	"net/http"
+	"net/url"
+)
 
 type htmlParser interface {
 	findURLs() []string
@@ -12,18 +14,18 @@ type urlFrontier interface {
 	// Returns the next url to process and ok,
 	// or an error if there are no urls left.
 	// Order depends on implementation.
-	nextURL() (string, error)
+	nextURLString() (string, error)
 	// Add new url to the frontier.
-	addURL(string)
+	addURLString(string)
 	// Check if there is any url in the frontier.
 	isEmpty() bool
 }
 
 type urlStore interface {
 	// Returns true if values does not exist in cache or is different.
-	put(k string, v []byte) bool
+	put(k string, v io.Reader) bool
 	// Returns the value of the key in bytes and ok, or empty []byte and an error.
-	get(string) ([]byte, error)
+	get(string) (io.Reader, error)
 }
 
 type accessPolicyChecker interface {
@@ -32,6 +34,7 @@ type accessPolicyChecker interface {
 }
 
 type fetcher interface {
+	getURLContent(url *url.URL) (*http.Response, error)
 }
 
 type crawler interface {

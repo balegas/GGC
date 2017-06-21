@@ -22,3 +22,11 @@ func NewRedirectResponse(location string) *http.Response {
 		Header:     http.Header{"Location": {location}},
 	}
 }
+
+func startMock() {
+	httpmock.Activate()
+}
+
+func endMock() {
+	httpmock.DeactivateAndReset()
+}

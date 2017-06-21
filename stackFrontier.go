@@ -26,12 +26,15 @@ func newStackFrontier(baseSize uint) *stackFrontier {
 	return &stackFrontier{urlStack: s}
 }
 
-func (f *stackFrontier) addURL(url string) {
+func (f *stackFrontier) addURLString(url string) {
 	f.urlStack.Push(url)
 }
 
-func (f *stackFrontier) nextURL() (string, error) {
+func (f *stackFrontier) nextURLString() (string, error) {
 	ret, err := f.urlStack.Pop()
+	if err != nil {
+		return "", err
+	}
 	return ret.(string), err
 }
 

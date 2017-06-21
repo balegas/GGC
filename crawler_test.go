@@ -1,25 +1,39 @@
 package main
 
 import (
-	"math"
+	"log"
 	"testing"
 	"time"
 )
 
 const defaultStackSize = 1024
 
-func newBasicCrawlerWithNoPolicy(domainName string, duration time.Duration) crawler {
+func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string, duration time.Duration) crawler {
 	c := newBasicCrawler()
-	p := newAllAllowedPolicy()
-	f := newStackFrontier(defaultStackSize)
-	initBasicCrawler(c, domainName, p, f, duration)
+	p := newCheckDomainPolicy()
+	initCheckDomainPolicy(p, domainNames)
+
+	fe := defaultFetcher(p)
+	fr := newStackFrontier(defaultStackSize)
+	s := newDummyURLStore()
+	initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
 	return c
 }
 
 func TestBasicCrawlerWithNoLinks(t *testing.T) {
-	c := newBasicCrawlerWithNoPolicy("domainA.com", math.MaxInt64)
-	_, error := c.crawl()
+	//TODO: Does not accept subdomains
+	startMock()
+	defer endMock()
+	domainNames := []string{"domainGGC.com", "www.domainGGC.com"}
+	setUpFakePage("http://www.domainGGC.com/", "testFiles/home.html")
+	setUpFakePage("http://domainGGC.com/", "testFiles/home.html")
+	setUpFakePage("http://www.domainGGC.com/page1/", "testFiles/page1.html")
+	setUpFakePage("http://domainGGC.com/page1/", "testFiles/page1.html")
+	oneSeconds := time.Duration(1) * time.Second
+	c := newBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	nilSitemap, error := c.crawl()
 	if error != nil {
 		t.Fail()
 	}
+	log.Printf("%s", nilSitemap)
 }
