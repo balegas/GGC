@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+//TODO: Does not accept subdomains
+
 type checkDomainPolicy struct {
 	domainNames []string
 }

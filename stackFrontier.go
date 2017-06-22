@@ -14,7 +14,6 @@ type stack interface {
 	Len() int
 }
 
-//FIXME: How to use unexported types properly?
 type stackFrontier struct {
 	urlStack stack
 }

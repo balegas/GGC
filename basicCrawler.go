@@ -18,11 +18,10 @@ var crawlTags = map[string]string{
 	// others?
 }
 
-// basicCrawler is a simple web crawler that is single-threaded, uses a
-// stack-based url frontier, and applies no strategies to choose the urls to
-// visit.
+// basicCrawler is a single-threaded web crawler with support for generic
+// urlFrontier, url fetcher and cache, and access policy rules.
 type basicCrawler struct {
-	finishTime time.Time // make default time = math.MaxInt64
+	finishTime time.Time
 	fetcher    fetcher
 	rules      accessPolicyChecker
 	frontier   urlFrontier
@@ -48,7 +47,6 @@ func initBasicCrawler(c *basicCrawler, seed []string, fet fetcher, rules accessP
 
 // Crawl a webdomain
 func (c *basicCrawler) crawl() (sitemap, error) {
-	// Check if you're doint pointers right in initbasicCrawler
 	var s sitemap
 	for !c.frontier.isEmpty() && !c.isTimeout() {
 		curl, err := c.frontier.nextURLString()

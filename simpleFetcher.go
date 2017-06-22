@@ -12,7 +12,7 @@ var errorFetching = errors.New("Error fetching URL")
 var errorDomain = errors.New("Reading outside domain")
 var errorRedirection = errors.New("Maximum redirections reached")
 
-//var ErrorLocation = errors.New("Location header is empty")
+var defaultMaxRedirection = 10
 
 type simpleFetcher struct {
 	rules           accessPolicyChecker
@@ -26,7 +26,7 @@ func defaultFetcher(rules accessPolicyChecker) simpleFetcher {
 		return http.ErrUseLastResponse
 	}}
 
-	return simpleFetcher{rules, httpClient, nil, 10}
+	return simpleFetcher{rules, httpClient, nil, defaultMaxRedirection}
 }
 
 func (f simpleFetcher) getURLContent(url *url.URL) (*http.Response, error) {
