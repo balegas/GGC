@@ -46,61 +46,62 @@ func initBasicCrawler(c *basicCrawler, seed []string, fet fetcher, rules accessP
 	c.store = s
 }
 
-func (c *basicCrawler) isTimeout() bool {
-	return c.finishTime.Before(time.Now())
-}
-
 // Crawl a webdomain
 func (c *basicCrawler) crawl() (sitemap, error) {
 	// Check if you're doint pointers right in initbasicCrawler
 	var s sitemap
 	for !c.frontier.isEmpty() && !c.isTimeout() {
 		curl, err := c.frontier.nextURLString()
-		//log.Printf("NEXT  %s", curl)
+		log.Printf("NEXT  %s", curl)
 		if err != nil {
 			log.Fatal("Error dequeuing.")
 		}
 		if c.canProcess(curl) {
 			nextURL, _ := toURL(curl)
 			newURLs, body, err := c.findURLLinksGetBody(nextURL)
+			receivedURLs := len(newURLs)
+			foundURLs := 0
 			//log.Printf("newURLS %s", newURLs)
 			if err != nil {
 				log.Printf("Error processing page: %s", err)
-				//Mark as visited with empty value
-				c.markProcessed(curl, []byte{})
+				c.storeURL(curl, []byte{})
 				continue
 			} else {
 				bodyInBytes, _ := ioutil.ReadAll(body)
-				c.markProcessed(curl, bodyInBytes)
+				c.storeURL(curl, bodyInBytes)
 				for _, u := range newURLs {
 					//Must make url cannonical before checking that can be processed.
 					curli, _ := getCanonicalURLString(u, nextURL)
-					if c.canProcess(curli) {
-						//log.Printf("Added to frontier %s", curli)
+					if c.canProcess(curli) && !c.seen(curli) {
+						foundURLs++
+						c.storeURL(curli, []byte{})
 						c.frontier.addURLString(curli)
+
 					}
 				}
 			}
-
+			log.Printf("Received %v URLS. New: %v", receivedURLs, foundURLs)
 		}
 	}
 	log.Printf("Finished")
 	return s, nil
 }
+
+// Checks if access policy allows this URL.
 func (c *basicCrawler) canProcess(curl string) bool {
-	//TODO: Add cache verification
-	if _, exists := c.store.get(curl); exists {
-		return false
-	}
+	// This check is being done in two diff. places, but seems more efficient
+	// this way
 	return c.rules.checkURL(curl)
 }
 
-/*
-func (c *basicCrawler) visited(curl string) bool {
-	//TODO: Integrate URL Store
+// Checks if url has been seen (might have not been processed yet)
+func (c *basicCrawler) seen(curl string) bool {
+	if _, exists := c.store.get(curl); exists {
+		return true
+
+	}
 	return false
 }
-*/
 
 func (c *basicCrawler) findURLLinksGetBody(url *url.URL) ([]string, io.Reader, error) {
 	content, err := c.fetcher.getURLContent(url)
@@ -113,14 +114,18 @@ func (c *basicCrawler) findURLLinksGetBody(url *url.URL) ([]string, io.Reader, e
 	return getAllTagAttr(crawlTags, content.Body), content.Body, nil
 }
 
-func (c *basicCrawler) markProcessed(curl string, body []byte) {
+func (c *basicCrawler) storeURL(curl string, body []byte) {
 	c.store.put(curl, body)
+}
+
+func (c *basicCrawler) isTimeout() bool {
+	return c.finishTime.Before(time.Now())
 }
 
 func main() {
 
 	domainNames := os.Args[1:]
-	TenSeconds := time.Duration(10) * time.Second
+	TenSeconds := time.Duration(20) * time.Second
 
 	c := newBasicCrawler()
 	p := newCheckDomainPolicy()
