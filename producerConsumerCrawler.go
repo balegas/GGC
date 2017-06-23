@@ -50,7 +50,7 @@ func (c *producerConsumerCrawler) crawl() (sitemap, error) {
 	for !c.frontier.isEmpty() && !c.isTimeout() {
 
 		//Fill the channel for processing
-		log.Printf("Filling new batch")
+		log.Printf("Filling new batch. Count %v", foundURLs)
 		pendingURLsC := make(chan string, urlChanBufferSize)
 		c.enqueueMultiple(pendingURLsC)
 
@@ -63,7 +63,7 @@ func (c *producerConsumerCrawler) crawl() (sitemap, error) {
 			select {
 			// New URL arrived
 			case curli := <-newURLsC:
-				log.Printf("Updating frontier %s", curli)
+				//log.Printf("Updating frontier %s", curli)
 				if c.canProcess(curli) && !c.seen(curli) {
 					foundURLs++
 					c.storeURL(curli, []byte{})
@@ -104,7 +104,7 @@ func (c *producerConsumerCrawler) enqueueMultiple(pendingURLsC chan string) {
 func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string,
 	signalC chan bool) {
 	for curl := range pendingURLsC {
-		log.Printf("NEXT  %s", curl)
+		//log.Printf("NEXT  %s", curl)
 		if c.canProcess(curl) {
 			nextURL, _ := toURL(curl)
 			newURLs, _, err := c.findURLLinksGetBody(nextURL)
@@ -119,7 +119,7 @@ func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string
 				// bodyInBytes, _ := ioutil.ReadAll(body)
 				// c.storeURL(curl, bodyInBytes)
 				for _, url := range newURLs {
-					log.Printf("Push new %s", url)
+					//log.Printf("Push new %s", url)
 					curli, _ := getCanonicalURLString(url, nextURL)
 					newURLsC <- curli
 				}
