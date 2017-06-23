@@ -48,7 +48,6 @@ func (c *producerConsumerCrawler) crawl() (sitemap, error) {
 	for (!c.frontier.isEmpty() || !finishedBatch) && !c.isTimeout() {
 
 		//Fill the channel for processing
-		log.Printf("Filling new batch. Count %v", foundURLs)
 		pendingURLsC := make(chan string, urlChanBufferSize)
 		c.enqueueMultiple(pendingURLsC)
 		finishedBatch := false
@@ -61,12 +60,8 @@ func (c *producerConsumerCrawler) crawl() (sitemap, error) {
 			select {
 			// New URL arrived
 			case curli := <-newURLsC:
-				//log.Printf("Updating frontier %s", curli)
-				if c.canProcess(curli) && !c.seen(curli) {
-					foundURLs++
-					c.storeURL(curli, []byte{})
-					c.frontier.addURLString(curli)
-				}
+				foundURLs++
+				c.frontier.addURLString(curli)
 
 			case <-signalC:
 				finishedBatch = true
@@ -92,7 +87,7 @@ func (c *producerConsumerCrawler) enqueueMultiple(pendingURLsC chan string) {
 		select {
 		case pendingURLsC <- url:
 		default:
-			// Filled queue wait for results
+			// Filled queue. Put value back and continue
 			c.frontier.addURLString(url)
 			filled = true
 
@@ -101,6 +96,7 @@ func (c *producerConsumerCrawler) enqueueMultiple(pendingURLsC chan string) {
 	close(pendingURLsC)
 }
 
+//TODO: Consider make routine independent of Crawler
 func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string,
 	signalC chan bool) {
 	for curl := range pendingURLsC {
@@ -110,18 +106,17 @@ func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string
 			newURLs, _, err := c.findURLLinksGetBody(nextURL)
 
 			if err != nil {
-				log.Printf("Error processing page: %s", err)
 				c.storeURL(curl, []byte{})
 				continue
 			} else {
-				// Doing nothing with content body. Comment for now.
-				// Would require more synchronization, or passing content to the coordinator.
 				// bodyInBytes, _ := ioutil.ReadAll(body)
 				// c.storeURL(curl, bodyInBytes)
 				for _, url := range newURLs {
-					//log.Printf("Push new %s", url)
 					curli, _ := getCanonicalURLString(url, nextURL)
-					newURLsC <- curli
+					if c.canProcess(curli) && !c.seen(curli) {
+						c.storeURL(curli, []byte{})
+						newURLsC <- curli
+					}
 				}
 				log.Printf("Received %v URLS.", len(newURLs))
 			}
@@ -150,7 +145,6 @@ func (c *producerConsumerCrawler) findURLLinksGetBody(url *url.URL) ([]string, i
 	content, err := c.fetcher.getURLContent(url)
 	//TODO: push content/or content hash to store
 	if err != nil {
-		log.Printf("error fetching content from url: %s : %s", url, err)
 		return nil, nil, err
 	}
 	// Reading the value twice :/
