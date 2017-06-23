@@ -3,24 +3,31 @@ package main
 import (
 	"crypto/sha1"
 	"errors"
+	"sync"
 )
 
 var errorValueDoesNotExist = errors.New("Value does not exist")
 
 type inMemoryURLStore struct {
 	pathToHash map[string][]byte
+	mutex      sync.RWMutex
 }
 
 func newInMemoryURLStore() *inMemoryURLStore {
-	return &inMemoryURLStore{make(map[string][]byte)}
+	return &inMemoryURLStore{pathToHash: make(map[string][]byte)}
 }
 
 func (s *inMemoryURLStore) put(k string, content []byte) bool {
-	s.pathToHash[k] = hashContent(content)
+	h := hashContent(content)
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.pathToHash[k] = h
 	return true
 }
 
 func (s *inMemoryURLStore) get(k string) ([]byte, bool) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 	if value, ok := s.pathToHash[k]; ok {
 		return value, true
 	}
