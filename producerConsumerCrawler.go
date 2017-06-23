@@ -81,7 +81,8 @@ func (c *producerConsumerCrawler) crawl() (sitemap, error) {
 }
 
 func (c *producerConsumerCrawler) enqueueMultiple(pendingURLsC chan string) {
-	for !c.frontier.isEmpty() {
+	filled := false
+	for !c.frontier.isEmpty() && !filled {
 		url, err := c.frontier.nextURLString()
 		if err != nil {
 			log.Fatal("Error dequeuing.")
@@ -92,7 +93,8 @@ func (c *producerConsumerCrawler) enqueueMultiple(pendingURLsC chan string) {
 		default:
 			// Filled queue wait for results
 			c.frontier.addURLString(url)
-			break
+			filled = true
+
 		}
 	}
 	close(pendingURLsC)
