@@ -40,3 +40,7 @@ func (f *stackFrontier) nextURLString() (string, error) {
 func (f *stackFrontier) isEmpty() bool {
 	return f.urlStack.Len() == 0
 }
+
+func (f *stackFrontier) size() int {
+	return f.urlStack.Len()
+}

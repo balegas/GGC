@@ -19,6 +19,7 @@ type urlFrontier interface {
 	addURLString(string)
 	// Check if there is any url in the frontier.
 	isEmpty() bool
+	size() int
 }
 
 type urlStore interface {

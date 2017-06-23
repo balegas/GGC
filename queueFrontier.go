@@ -16,7 +16,7 @@ func (f *queueFrontier) addURLString(url string) {
 }
 
 func (f *queueFrontier) nextURLString() (string, error) {
-	if len(f.urlQueue) > 0 {
+	if f.size() > 0 {
 		ret := f.urlQueue[0]
 		f.urlQueue = f.urlQueue[1:]
 		return ret.(string), nil
@@ -25,5 +25,9 @@ func (f *queueFrontier) nextURLString() (string, error) {
 }
 
 func (f *queueFrontier) isEmpty() bool {
-	return len(f.urlQueue) <= 0
+	return f.size() <= 0
+}
+
+func (f *queueFrontier) size() int {
+	return len(f.urlQueue)
 }
