@@ -53,3 +53,15 @@ func newProducerConsumerWithDomainPolicy(userAgent string, domainNames []string,
 	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s)
 	return c
 }
+
+func newNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string, duration time.Duration) crawler {
+	c := newNBatchesCrawler()
+	p := newCheckDomainPolicy()
+	initCheckDomainPolicy(p, domainNames)
+
+	fe := defaultFetcher(p)
+	fr := newStackFrontier(defaultStackSize)
+	s := newInMemoryURLStore()
+	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, 4)
+	return c
+}

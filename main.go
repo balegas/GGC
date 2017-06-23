@@ -28,8 +28,8 @@ func main() {
 	log.Printf("DomainNames: %v, duration: %v", domainNames, durationInt)
 
 	//c := newBasicCrawler()
-	c := newProducerConsumerCrawler()
-	//c := newNBatchesCrawler()
+	//c := newProducerConsumerCrawler()
+	c := newNBatchesCrawler()
 
 	p := newCheckDomainPolicy()
 	initCheckDomainPolicy(p, domainNames)
@@ -39,8 +39,8 @@ func main() {
 	s := newInMemoryURLStore()
 
 	//initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
-	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s)
-	//initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s)
+	//initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s)
+	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, 4)
 
 	nilSitemap, _ := c.crawl()
 	log.Printf("%s", nilSitemap)

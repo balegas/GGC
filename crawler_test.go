@@ -33,8 +33,9 @@ func TestCrawlersMock(t *testing.T) {
 
 	bC := newBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
 	pcC := newProducerConsumerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	nbC := newNBatchesCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
 
-	C := []crawler{bC, pcC}
+	C := []crawler{bC, pcC, nbC}
 
 	for _, c := range C {
 		nilSitemap, error := c.crawl()
