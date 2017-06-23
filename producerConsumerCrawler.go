@@ -40,22 +40,23 @@ func initProducerConsumerCrawler(c *producerConsumerCrawler, seed []string, fet 
 func (c *producerConsumerCrawler) crawl() (sitemap, error) {
 	var s sitemap
 	foundURLs := 0
+	finishedBatch := true
 
 	newURLsC := make(chan string, urlChanBufferSize)
 	signalC := make(chan bool)
 
-	for !c.frontier.isEmpty() && !c.isTimeout() {
+	for (!c.frontier.isEmpty() || !finishedBatch) && !c.isTimeout() {
 
 		//Fill the channel for processing
 		log.Printf("Filling new batch. Count %v", foundURLs)
 		pendingURLsC := make(chan string, urlChanBufferSize)
 		c.enqueueMultiple(pendingURLsC)
+		finishedBatch := false
 
 		go c.processURLs(pendingURLsC, newURLsC, signalC)
 
 		// Wait for a batch to be complete before enqueueing new.
 		// Process new urls meanwhile.
-		finishedBatch := false
 		for !finishedBatch {
 			select {
 			// New URL arrived
