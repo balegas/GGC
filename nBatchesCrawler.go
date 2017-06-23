@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-// ProducerConsumer Crawler has two cooperatingg goroutines.
-// One manages the urlFrontier and the other processes the requests.
-// Its a simpler version of the multiple-workers approach and main purpose
-// is to exercise the concurrency primitives of the language.
+// NBatches Crawler uses go routines to crawl the internet.
+// Each go routine receives a batch of urls to process and returns a slice of
+// found urls.
+// Go routines share a cache of visited urls, that must be thread-safe.
 type nBatchesCrawler struct {
 	finishTime  time.Time
 	fetcher     fetcher
