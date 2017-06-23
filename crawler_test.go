@@ -19,8 +19,9 @@ func TestCrawlerOnWeb(t *testing.T) {
 }
 */
 
-func TestBasicCrawlerMock(t *testing.T) {
-	//TODO: Does not accept subdomains
+//TODO: Compare results of different Crawlers.
+//TODO: Define test checks.
+func TestCrawlersMock(t *testing.T) {
 	startMock()
 	defer endMock()
 	domainNames := []string{"domainGGC.com", "www.domainGGC.com"}
@@ -29,10 +30,18 @@ func TestBasicCrawlerMock(t *testing.T) {
 	setUpFakePage("http://www.domainGGC.com/page1/", "testFiles/page1.html")
 	setUpFakePage("http://domainGGC.com/page1/", "testFiles/page1.html")
 	oneSeconds := time.Duration(1) * time.Second
-	c := newBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
-	nilSitemap, error := c.crawl()
-	if error != nil {
-		t.Fail()
+
+	bC := newBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	pcC := newProducerConsumerWithDomainPolicy("GGC", domainNames, oneSeconds)
+
+	C := []crawler{bC, pcC}
+
+	for _, c := range C {
+		nilSitemap, error := c.crawl()
+		if error != nil {
+			t.Fail()
+		}
+		log.Printf("%s", nilSitemap)
 	}
-	log.Printf("%s", nilSitemap)
+
 }

@@ -41,3 +41,15 @@ func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string, dur
 	initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
 	return c
 }
+
+func newProducerConsumerWithDomainPolicy(userAgent string, domainNames []string, duration time.Duration) crawler {
+	c := newProducerConsumerCrawler()
+	p := newCheckDomainPolicy()
+	initCheckDomainPolicy(p, domainNames)
+
+	fe := defaultFetcher(p)
+	fr := newStackFrontier(defaultStackSize)
+	s := newInMemoryURLStore()
+	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s)
+	return c
+}

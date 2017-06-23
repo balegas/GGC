@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/url"
-	"os"
 	"time"
 )
 
@@ -120,6 +119,8 @@ func (c *basicCrawler) isTimeout() bool {
 	return c.finishTime.Before(time.Now())
 }
 
+/*
+//TODO: Make a single main function
 func main() {
 
 	domainNames := os.Args[1:]
@@ -137,3 +138,4 @@ func main() {
 	nilSitemap, _ := c.crawl()
 	log.Printf("%s", nilSitemap)
 }
+*/
