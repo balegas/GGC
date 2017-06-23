@@ -8,17 +8,9 @@ import (
 	"time"
 )
 
-var crawlTags = map[string]string{
-	// Header tags
-	"link":   "href",
-	"script": "source",
-	// Body tags
-	"a": "href",
-	// others?
-}
-
 // basicCrawler is a single-threaded web crawler with support for generic
 // urlFrontier, url fetcher and cache, and access policy rules.
+
 type basicCrawler struct {
 	finishTime time.Time
 	fetcher    fetcher
@@ -47,6 +39,8 @@ func initBasicCrawler(c *basicCrawler, seed []string, fet fetcher, rules accessP
 // Crawl a webdomain
 func (c *basicCrawler) crawl() (sitemap, error) {
 	var s sitemap
+	var foundURLs = 0
+
 	for !c.frontier.isEmpty() && !c.isTimeout() {
 		curl, err := c.frontier.nextURLString()
 		log.Printf("NEXT  %s", curl)
@@ -57,7 +51,6 @@ func (c *basicCrawler) crawl() (sitemap, error) {
 			nextURL, _ := toURL(curl)
 			newURLs, body, err := c.findURLLinksGetBody(nextURL)
 			receivedURLs := len(newURLs)
-			foundURLs := 0
 			//log.Printf("newURLS %s", newURLs)
 			if err != nil {
 				log.Printf("Error processing page: %s", err)
@@ -77,10 +70,10 @@ func (c *basicCrawler) crawl() (sitemap, error) {
 					}
 				}
 			}
-			log.Printf("Received %v URLS. New: %v", receivedURLs, foundURLs)
+			log.Printf("Received %v URLS.", receivedURLs)
 		}
 	}
-	log.Printf("Finished")
+	log.Printf("Finished. Found %v urls.", foundURLs)
 	return s, nil
 }
 

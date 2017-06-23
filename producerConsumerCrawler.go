@@ -4,11 +4,8 @@ import (
 	"io"
 	"log"
 	"net/url"
-	"os"
 	"time"
 )
-
-var urlChanBufferSize = 100
 
 // ProducerConsumer Crawler has two cooperatingg goroutines.
 // One manages the urlFrontier and the other processes the requests.
@@ -123,6 +120,7 @@ func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string
 					curli, _ := getCanonicalURLString(url, nextURL)
 					newURLsC <- curli
 				}
+				log.Printf("Received %v URLS.", len(newURLs))
 			}
 		}
 	}
@@ -163,50 +161,3 @@ func (c *producerConsumerCrawler) storeURL(curl string, body []byte) {
 func (c *producerConsumerCrawler) isTimeout() bool {
 	return c.finishTime.Before(time.Now())
 }
-
-func main() {
-
-	domainNames := os.Args[1:]
-	TenSeconds := time.Duration(20) * time.Second
-
-	c := newProducerConsumerCrawler()
-	p := newCheckDomainPolicy()
-	initCheckDomainPolicy(p, domainNames)
-
-	fe := defaultFetcher(p)
-	fr := newStackFrontier(defaultStackSize)
-	s := newInMemoryURLStore()
-	initProducerConsumerCrawler(c, domainNames, fe, p, fr, TenSeconds, s)
-
-	nilSitemap, _ := c.crawl()
-	log.Printf("%s", nilSitemap)
-}
-
-/*
-func main() {
-	startMock()
-	defer endMock()
-	domainNames := []string{"domainGGC.com", "www.domainGGC.com"}
-	setUpFakePage("http://www.domainGGC.com/", "testFiles/home.html")
-	setUpFakePage("http://domainGGC.com/", "testFiles/home.html")
-	setUpFakePage("http://www.domainGGC.com/page1/", "testFiles/page1.html")
-	setUpFakePage("http://domainGGC.com/page1/", "testFiles/page1.html")
-	oneSeconds := time.Duration(1) * time.Second
-
-	//bC := newBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
-	pcC := newProducerConsumerWithDomainPolicy("GGC", domainNames, oneSeconds)
-
-	C := []crawler{pcC}
-
-	//C := []crawler{bC, pcC}
-
-	for _, c := range C {
-		nilSitemap, error := c.crawl()
-		if error != nil {
-
-		}
-		log.Printf("%s", nilSitemap)
-	}
-
-}
-*/
