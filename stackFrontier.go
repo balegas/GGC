@@ -32,11 +32,11 @@ func (f *stackFrontier) addURLString(url string) {
 func (f *stackFrontier) nextURLString() (string, error) {
 	ret, err := f.urlStack.Pop()
 	if err != nil {
-		return "", err
+		return "", errEmptyFrontier
 	}
 	return ret.(string), err
 }
 
 func (f *stackFrontier) isEmpty() bool {
-	return f.urlStack.Len() <= 0
+	return f.urlStack.Len() == 0
 }

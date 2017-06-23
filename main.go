@@ -17,28 +17,30 @@ var crawlTags = map[string]string{
 	// others?
 }
 
-const urlChanBufferSize = 100
+const urlChanBufferSize = 10
 
 func main() {
 
-	domainNames := os.Args[1 : len(os.Args)-2]
+	domainNames := os.Args[1 : len(os.Args)-1]
 	durationInt, _ := strconv.Atoi(os.Args[len(os.Args)-1])
 	duration := time.Duration(durationInt) * time.Second
 
-	c := newBasicCrawler()
-	//c := newProducerConsumerCrawler()
+	log.Printf("DomainNames: %v, duration: %v", domainNames, durationInt)
+
+	//c := newBasicCrawler()
+	c := newProducerConsumerCrawler()
 	//c := newNBatchesCrawler()
 
 	p := newCheckDomainPolicy()
 	initCheckDomainPolicy(p, domainNames)
 
 	fe := defaultFetcher(p)
-	fr := newStackFrontier(defaultStackSize)
+	fr := newQueueFrontier(defaultStackSize)
 	s := newInMemoryURLStore()
 
-	initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
-	//initProducerConsumerCrawler(c, domainNames, fe, p, fr, TenSeconds, s)
-	//initNBatchesCrawler(c, domainNames, fe, p, fr, TenSeconds, s)
+	//initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
+	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s)
+	//initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s)
 
 	nilSitemap, _ := c.crawl()
 	log.Printf("%s", nilSitemap)
