@@ -7,5 +7,5 @@ It supports two modes for searching links. In **well behaved** mode, the crawler
 Current Version only support **aggressive** mode. To run type:
 
 ```bash
- go build && ./GGC [LIST OF DOMAIN NAMES]
+ go build && ./GGC [LIST OF DOMAIN NAMES] [DURATION]
 ```
