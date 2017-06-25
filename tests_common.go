@@ -41,7 +41,10 @@ func NewBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string,
 	fe := defaultFetcher(p)
 	fr := newStackFrontier(defaultStackSize)
 	s := newInMemoryURLStore()
-	initBasicCrawler(c, domainNames, fe, p, fr, duration, s)
+	sm := newOrderedTreeSitemap()
+
+	initOrderedTreeSitemap(sm)
+	initBasicCrawler(c, domainNames, fe, p, fr, duration, s, sm)
 	return c
 }
 
@@ -56,7 +59,10 @@ func NewProducerConsumerWithDomainPolicy(userAgent string, domainNames []string,
 	fe := defaultFetcher(p)
 	fr := newStackFrontier(defaultStackSize)
 	s := newInMemoryURLStore()
-	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s)
+	sm := newOrderedTreeSitemap()
+
+	initOrderedTreeSitemap(sm)
+	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s, sm)
 	return c
 }
 
@@ -71,6 +77,9 @@ func NewNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string,
 	fe := defaultFetcher(p)
 	fr := newStackFrontier(defaultStackSize)
 	s := newInMemoryURLStore()
-	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, 4)
+	sm := newOrderedTreeSitemap()
+
+	initOrderedTreeSitemap(sm)
+	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, 4, sm)
 	return c
 }

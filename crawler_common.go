@@ -14,11 +14,12 @@ type crawlerInternals struct {
 	rules      accessPolicy
 	frontier   urlFrontier
 	store      urlStore
+	sitemap    sitemap
 }
 
 func initCommonAttributes(c *crawlerInternals, seed []string,
 	fet fetcher, rules accessPolicy, uf urlFrontier, duration time.Duration,
-	s urlStore) {
+	s urlStore, sm sitemap) {
 	c.rules = rules
 	c.finishTime = time.Now().Add(duration)
 	c.fetcher = fet
@@ -29,6 +30,7 @@ func initCommonAttributes(c *crawlerInternals, seed []string,
 		c.frontier.addURLString(curl)
 	}
 	c.store = s
+	c.sitemap = sm
 }
 
 // Checks if access policy allows this URL.
@@ -65,4 +67,8 @@ func (c *crawlerInternals) findURLLinksGetBody(url *url.URL) ([]string,
 		return nil, nil, err
 	}
 	return getAllTagAttr(crawlTags, content.Body), content.Body, nil
+}
+
+func (c *crawlerInternals) printSitemap(s sitemap, out io.Writer) {
+	s.printSitemap(out)
 }

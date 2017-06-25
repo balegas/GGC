@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -28,11 +28,11 @@ func TestCrawlersMock(t *testing.T) {
 	C := []Crawler{bC, pcC, nbC}
 
 	for _, c := range C {
-		nilSitemap, error := c.Crawl()
+		sm, error := c.Crawl()
 		if error != nil {
 			t.Fail()
 		}
-		log.Printf("%s", nilSitemap)
+		sm.printSitemap(os.Stdout)
 	}
 
 }

@@ -21,8 +21,8 @@ func newNBatchesCrawler() *nBatchesCrawler {
 
 func initNBatchesCrawler(c *nBatchesCrawler, seed []string, fet fetcher,
 	rules accessPolicy, uf urlFrontier, duration time.Duration, s urlStore,
-	maxRoutines int) {
-	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s)
+	maxRoutines int, sm sitemap) {
+	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s, sm)
 	c.maxWorkers = maxRoutines
 	c.currWorkers = 0
 }
@@ -36,7 +36,6 @@ func initNBatchesCrawler(c *nBatchesCrawler, seed []string, fet fetcher,
 // ensure that the workers always have enough work. Can tune number of threads
 // and the buffer size of channels.
 func (c *nBatchesCrawler) Crawl() (sitemap, error) {
-	var s sitemap
 	foundURLs := 0
 
 	newURLsC := make(chan []string, urlChanBufferSize)
@@ -67,7 +66,7 @@ func (c *nBatchesCrawler) Crawl() (sitemap, error) {
 	log.Printf("Finished. Found %v urls.", foundURLs)
 	close(newURLsC)
 	close(signalC)
-	return s, nil
+	return c.sitemap, nil
 }
 
 func (c *nBatchesCrawler) spawnRoutines(newURLsC chan []string, signalC chan bool) {
@@ -106,6 +105,7 @@ func (c *nBatchesCrawler) processURLs(pendingURLsC chan string,
 	for curl := range pendingURLsC {
 		//log.Printf("NEXT  %s", curl)
 		if c.canProcess(curl) {
+			c.sitemap.addURL(curl)
 			visitedURLs++
 			nextURL, _ := toURL(curl)
 			newURLs, _, err := c.findURLLinksGetBody(nextURL)

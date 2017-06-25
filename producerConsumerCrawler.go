@@ -19,13 +19,12 @@ func newProducerConsumerCrawler() *producerConsumerCrawler {
 
 func initProducerConsumerCrawler(c *producerConsumerCrawler, seed []string,
 	fet fetcher, rules accessPolicy, uf urlFrontier,
-	duration time.Duration, s urlStore) {
-	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s)
+	duration time.Duration, s urlStore, sm sitemap) {
+	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s, sm)
 }
 
 // Crawl function reads and writes to frontier in isolation.
 func (c *producerConsumerCrawler) Crawl() (sitemap, error) {
-	var s sitemap
 	foundURLs := 0
 	finishedBatch := true
 
@@ -58,7 +57,7 @@ func (c *producerConsumerCrawler) Crawl() (sitemap, error) {
 	log.Printf("Finished. Found %v urls.", foundURLs)
 	close(newURLsC)
 	close(signalC)
-	return s, nil
+	return c.sitemap, nil
 }
 
 func (c *producerConsumerCrawler) enqueueMultiple(pendingURLsC chan string) {
@@ -87,6 +86,7 @@ func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string
 
 	for curl := range pendingURLsC {
 		if c.canProcess(curl) {
+			c.sitemap.addURL(curl)
 			visitedURLs++
 			nextURL, _ := toURL(curl)
 			newURLs, _, err := c.findURLLinksGetBody(nextURL)

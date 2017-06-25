@@ -18,12 +18,12 @@ func newBasicCrawler() *basicCrawler {
 }
 
 func initBasicCrawler(c *basicCrawler, seed []string, fet fetcher,
-	rules accessPolicy, uf urlFrontier, duration time.Duration, s urlStore) {
-	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s)
+	rules accessPolicy, uf urlFrontier, duration time.Duration, s urlStore,
+	sm sitemap) {
+	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s, sm)
 }
 
 func (c *crawlerInternals) Crawl() (sitemap, error) {
-	var s sitemap
 	foundURLs := 0
 
 	for !c.frontier.isEmpty() && !c.isTimeout() {
@@ -32,6 +32,7 @@ func (c *crawlerInternals) Crawl() (sitemap, error) {
 			log.Fatal("Error dequeuing.")
 		}
 		if c.canProcess(curl) {
+			c.sitemap.addURL(curl)
 			nextURL, _ := toURL(curl)
 			newURLs, body, err := c.findURLLinksGetBody(nextURL)
 			receivedURLs := len(newURLs)
@@ -48,7 +49,6 @@ func (c *crawlerInternals) Crawl() (sitemap, error) {
 						foundURLs++
 						c.storeURL(curli, []byte{})
 						c.frontier.addURLString(curli)
-
 					}
 				}
 			}
@@ -56,5 +56,5 @@ func (c *crawlerInternals) Crawl() (sitemap, error) {
 		}
 	}
 	log.Printf("Finished. Found %v urls.", foundURLs)
-	return s, nil
+	return c.sitemap, nil
 }

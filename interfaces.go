@@ -57,7 +57,7 @@ type Crawler interface {
 //TODO: interface might change.
 type sitemap interface {
 	// Add an url to the sitemap.
-	addURL() string
-	printSiteMap(io.Writer)
+	addURL(curl string)
+	printSitemap(io.Writer)
 	numberOfLinks() int
 }
