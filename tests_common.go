@@ -30,8 +30,10 @@ func setUpFakePage(pageLocation, pageFile string) {
 
 }
 
-func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string,
-	duration time.Duration) crawler {
+// NewBasicCrawlerWithDomainPolicy cretes a basicCrawler with acces policy based
+// on domain names.
+func NewBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string,
+	duration time.Duration) Crawler {
 	c := newBasicCrawler()
 	p := newCheckDomainPolicy()
 	initCheckDomainPolicy(p, domainNames)
@@ -43,8 +45,10 @@ func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string,
 	return c
 }
 
-func newProducerConsumerWithDomainPolicy(userAgent string, domainNames []string,
-	duration time.Duration) crawler {
+// NewProducerConsumerWithDomainPolicy cretes a producerConsumerCrawler with
+// acces policy based on domain names.
+func NewProducerConsumerWithDomainPolicy(userAgent string, domainNames []string,
+	duration time.Duration) Crawler {
 	c := newProducerConsumerCrawler()
 	p := newCheckDomainPolicy()
 	initCheckDomainPolicy(p, domainNames)
@@ -56,8 +60,10 @@ func newProducerConsumerWithDomainPolicy(userAgent string, domainNames []string,
 	return c
 }
 
-func newNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string,
-	duration time.Duration) crawler {
+// NewNBatchesCrawlerWithDomainPolicy cretes a nBatchesCrawler with acces policy
+// based on domain names.
+func NewNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string,
+	duration time.Duration) Crawler {
 	c := newNBatchesCrawler()
 	p := newCheckDomainPolicy()
 	initCheckDomainPolicy(p, domainNames)

@@ -22,7 +22,7 @@ func initBasicCrawler(c *basicCrawler, seed []string, fet fetcher,
 	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s)
 }
 
-func (c *crawlerInternals) crawl() (sitemap, error) {
+func (c *crawlerInternals) Crawl() (sitemap, error) {
 	var s sitemap
 	foundURLs := 0
 

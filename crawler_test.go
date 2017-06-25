@@ -21,14 +21,14 @@ func TestCrawlersMock(t *testing.T) {
 	setUpFakePage("http://domainGGC.com/page1/", "testFiles/page1.html")
 	oneSeconds := time.Duration(1) * time.Second
 
-	bC := newBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
-	pcC := newProducerConsumerWithDomainPolicy("GGC", domainNames, oneSeconds)
-	nbC := newNBatchesCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	bC := NewBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	pcC := NewProducerConsumerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	nbC := NewNBatchesCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
 
-	C := []crawler{bC, pcC, nbC}
+	C := []Crawler{bC, pcC, nbC}
 
 	for _, c := range C {
-		nilSitemap, error := c.crawl()
+		nilSitemap, error := c.Crawl()
 		if error != nil {
 			t.Fail()
 		}

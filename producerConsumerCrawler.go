@@ -24,7 +24,7 @@ func initProducerConsumerCrawler(c *producerConsumerCrawler, seed []string,
 }
 
 // Crawl function reads and writes to frontier in isolation.
-func (c *producerConsumerCrawler) crawl() (sitemap, error) {
+func (c *producerConsumerCrawler) Crawl() (sitemap, error) {
 	var s sitemap
 	foundURLs := 0
 	finishedBatch := true

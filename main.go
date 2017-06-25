@@ -42,6 +42,6 @@ func main() {
 	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s)
 	//initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, 4)
 
-	nilSitemap, _ := c.crawl()
+	nilSitemap, _ := c.Crawl()
 	log.Printf("%s", nilSitemap)
 }

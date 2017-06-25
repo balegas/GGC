@@ -35,7 +35,7 @@ func initNBatchesCrawler(c *nBatchesCrawler, seed []string, fet fetcher,
 // The objective is to ensure is that the frontier is sufficiently occupied, to
 // ensure that the workers always have enough work. Can tune number of threads
 // and the buffer size of channels.
-func (c *nBatchesCrawler) crawl() (sitemap, error) {
+func (c *nBatchesCrawler) Crawl() (sitemap, error) {
 	var s sitemap
 	foundURLs := 0
 

@@ -48,9 +48,9 @@ type fetcher interface {
 	getURLContent(url *url.URL) (*http.Response, error)
 }
 
-type crawler interface {
-	crawl() (sitemap, error)
-// crawler has a minimal interface
+// Crawler has a minimal interface
+type Crawler interface {
+	Crawl() (sitemap, error)
 }
 
 //Stores urls from a domains and can print them.
