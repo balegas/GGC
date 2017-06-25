@@ -1,6 +1,10 @@
 package main
 
-/*
+import (
+	"log"
+	"testing"
+)
+
 func TestGetTags(t *testing.T) {
 	file, err := readFileFromDisk("testFiles/simple_html.html")
 
@@ -15,4 +19,3 @@ func TestGetTags(t *testing.T) {
 
 	log.Printf("RESULT: %v", result)
 }
-*/

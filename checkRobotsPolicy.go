@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+//TODO: WIP
+
 type robotsRules struct {
 	pathsPerm map[string]bool //maps paths -> allowed/disallowed
 	userAgeng string

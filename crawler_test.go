@@ -4,26 +4,16 @@ import (
 	"log"
 	"testing"
 	"time"
-)
 
-/*
-func TestCrawlerOnWeb(t *testing.T) {
-	domainNames := []string{"gatofedorento.blogspot.pt", "www.gatofedorento.blogspot.pt"}
-	TenSeconds := time.Duration(10) * time.Second
-	c := newBasicCrawlerWithDomainPolicy("GGC", domainNames, TenSeconds)
-	nilSitemap, error := c.crawl()
-	if error != nil {
-		t.Fail()
-	}
-	log.Printf("%s", nilSitemap)
-}
-*/
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
+)
 
 //TODO: Compare results of different Crawlers.
 //TODO: Define test checks.
 func TestCrawlersMock(t *testing.T) {
-	startMock()
-	defer endMock()
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
 	domainNames := []string{"domainGGC.com", "www.domainGGC.com"}
 	setUpFakePage("http://www.domainGGC.com/", "testFiles/home.html")
 	setUpFakePage("http://domainGGC.com/", "testFiles/home.html")

@@ -1,39 +1,26 @@
 package main
 
 import (
-	"io"
 	"log"
-	"net/url"
 	"time"
 )
 
-// ProducerConsumer Crawler has two cooperatingg goroutines.
-// One manages the urlFrontier and the other processes the requests.
-// Its a simpler version of the multiple-workers approach and main purpose
-// is to exercise the concurrency primitives of the language.
+// ProducerConsumer is a Web crawler that runs independent routines for finding
+// new URLs and managing the urlFrontier.
+// Its a simpler version of the nBatchesCrawler. The purpose of developing this
+// was to to exercise the concurrency primitives of the language.
 type producerConsumerCrawler struct {
-	finishTime time.Time
-	fetcher    fetcher
-	rules      accessPolicyChecker
-	frontier   urlFrontier
-	store      urlStore
+	crawlerInternals
 }
 
 func newProducerConsumerCrawler() *producerConsumerCrawler {
 	return &producerConsumerCrawler{}
 }
 
-func initProducerConsumerCrawler(c *producerConsumerCrawler, seed []string, fet fetcher, rules accessPolicyChecker, uf urlFrontier, duration time.Duration, s urlStore) {
-	c.rules = rules
-	c.finishTime = time.Now().Add(duration)
-	c.fetcher = fet
-	c.frontier = uf
-	for _, domain := range seed {
-		domainURL, _ := url.Parse("http://" + domain + "/")
-		curl, _ := getCanonicalURLString("/", domainURL)
-		c.frontier.addURLString(curl) // Causes redirect if https.
-	}
-	c.store = s
+func initProducerConsumerCrawler(c *producerConsumerCrawler, seed []string,
+	fet fetcher, rules accessPolicy, uf urlFrontier,
+	duration time.Duration, s urlStore) {
+	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s)
 }
 
 // Crawl function reads and writes to frontier in isolation.
@@ -47,7 +34,6 @@ func (c *producerConsumerCrawler) crawl() (sitemap, error) {
 
 	for (!c.frontier.isEmpty() || !finishedBatch) && !c.isTimeout() {
 
-		//Fill the channel for processing
 		pendingURLsC := make(chan string, urlChanBufferSize)
 		c.enqueueMultiple(pendingURLsC)
 		finishedBatch := false
@@ -58,7 +44,6 @@ func (c *producerConsumerCrawler) crawl() (sitemap, error) {
 		// Process new urls meanwhile.
 		for !finishedBatch {
 			select {
-			// New URL arrived
 			case curli := <-newURLsC:
 				foundURLs++
 				c.frontier.addURLString(curli)
@@ -87,7 +72,6 @@ func (c *producerConsumerCrawler) enqueueMultiple(pendingURLsC chan string) {
 		select {
 		case pendingURLsC <- url:
 		default:
-			// Filled queue. Put value back and continue
 			c.frontier.addURLString(url)
 			filled = true
 
@@ -96,12 +80,14 @@ func (c *producerConsumerCrawler) enqueueMultiple(pendingURLsC chan string) {
 	close(pendingURLsC)
 }
 
-//TODO: Consider make routine independent of Crawler
 func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string,
 	signalC chan bool) {
+	visitedURLs := 0
+	found := 0
+
 	for curl := range pendingURLsC {
-		//log.Printf("NEXT  %s", curl)
 		if c.canProcess(curl) {
+			visitedURLs++
 			nextURL, _ := toURL(curl)
 			newURLs, _, err := c.findURLLinksGetBody(nextURL)
 
@@ -112,6 +98,7 @@ func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string
 				// bodyInBytes, _ := ioutil.ReadAll(body)
 				// c.storeURL(curl, bodyInBytes)
 				for _, url := range newURLs {
+					found++
 					curli, _ := getCanonicalURLString(url, nextURL)
 					if c.canProcess(curli) && !c.seen(curli) {
 						c.storeURL(curli, []byte{})
@@ -122,39 +109,6 @@ func (c *producerConsumerCrawler) processURLs(pendingURLsC, newURLsC chan string
 			}
 		}
 	}
+	log.Printf("BATCH RESULTS: VISITED: %v; FOUND: %v", visitedURLs, found)
 	signalC <- true
-}
-
-// Checks if access policy allows this URL.
-func (c *producerConsumerCrawler) canProcess(curl string) bool {
-	// This check is being done in two diff. places, but seems more efficient
-	// this way
-	return c.rules.checkURL(curl)
-}
-
-// Checks if url has been seen (might have not been processed yet)
-func (c *producerConsumerCrawler) seen(curl string) bool {
-	if _, exists := c.store.get(curl); exists {
-		return true
-
-	}
-	return false
-}
-
-func (c *producerConsumerCrawler) findURLLinksGetBody(url *url.URL) ([]string, io.Reader, error) {
-	content, err := c.fetcher.getURLContent(url)
-	//TODO: push content/or content hash to store
-	if err != nil {
-		return nil, nil, err
-	}
-	// Reading the value twice :/
-	return getAllTagAttr(crawlTags, content.Body), content.Body, nil
-}
-
-func (c *producerConsumerCrawler) storeURL(curl string, body []byte) {
-	c.store.put(curl, body)
-}
-
-func (c *producerConsumerCrawler) isTimeout() bool {
-	return c.finishTime.Before(time.Now())
 }

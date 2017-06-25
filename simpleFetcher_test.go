@@ -1,12 +1,20 @@
 package main
 
+import (
+	"io/ioutil"
+	"net/url"
+	"reflect"
+	"testing"
+
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
+)
+
 const domainA = "domainA.com"
 const domainB = "domainB.com"
 const locationA = "https://" + domainA + "/pageA"
 const locationA1 = "https://" + domainA + "/pageB"
 const locationB = "https://" + domainB + "/pageB"
 
-/*
 func TestGet(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
@@ -21,7 +29,8 @@ func TestGet(t *testing.T) {
 
 	f := defaultFetcher(p)
 
-	resp, _ := f.getURLContent(locationA)
+	urlA, _ := url.Parse(locationA)
+	resp, _ := f.getURLContent(urlA)
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	if !(reflect.DeepEqual(body, content)) {
@@ -45,7 +54,8 @@ func TestRedirect(t *testing.T) {
 
 	f := defaultFetcher(p)
 
-	resp, _ := f.getURLContent(locationA)
+	urlA, _ := url.Parse(locationA)
+	resp, _ := f.getURLContent(urlA)
 	body, _ := ioutil.ReadAll(resp.Body)
 	if !(reflect.DeepEqual(body, content)) {
 		t.Fail()
@@ -64,7 +74,8 @@ func TestInfiniteRedirect(t *testing.T) {
 
 	f := defaultFetcher(p)
 
-	_, err := f.getURLContent(locationA)
+	urlA, _ := url.Parse(locationA)
+	_, err := f.getURLContent(urlA)
 
 	if err != errorRedirection {
 		t.Fail()
@@ -84,7 +95,8 @@ func TestDifferentDomainRedirect(t *testing.T) {
 
 	f := defaultFetcher(p)
 
-	_, err := f.getURLContent(locationA)
+	urlA, _ := url.Parse(locationA)
+	_, err := f.getURLContent(urlA)
 
 	if err != errorDomain {
 		t.Fail()
@@ -100,10 +112,10 @@ func TestError(t *testing.T) {
 
 	f := defaultFetcher(p)
 
-	_, err := f.getURLContent(locationA)
+	urlA, _ := url.Parse(locationA)
+	_, err := f.getURLContent(urlA)
 
 	if err != errorFetching {
 		t.Fail()
 	}
 }
-*/

@@ -1,7 +1,6 @@
 package main
 
-//
-
+//// stackFrontier is LIFO.
 import (
 	"errors"
 

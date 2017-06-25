@@ -34,7 +34,6 @@ func getAllTagAttr(tagAttr map[string]string, content io.Reader) []string {
 	return found
 }
 
-//Not using error, can be removed
 func getCanonicalURLString(urlString string, parentURL *url.URL) (string, error) {
 	//TODO: transform parameters to path segments; order arguments by index lex. order
 	//Full path
@@ -46,7 +45,8 @@ func getCanonicalURLString(urlString string, parentURL *url.URL) (string, error)
 		lastIndexOf = strings.LastIndex(urlString, "#")
 	}
 
-	if strings.Index(urlString, "http://") == 0 || strings.Index(urlString, "https://") == 0 {
+	if strings.Index(urlString, "http://") == 0 || strings.Index(urlString,
+		"https://") == 0 {
 		return urlString, nil
 	}
 
@@ -59,8 +59,8 @@ func getCanonicalURLString(urlString string, parentURL *url.URL) (string, error)
 
 }
 
-//Only function that converts to url.URL.
 func toURL(urlString string) (*url.URL, error) {
-	//TODO: transform canonicalURL back to URL.
+	//TODO: after transforming urlParams in getCanonicalURLString,
+	// transform them back to URL.
 	return url.Parse(urlString)
 }

@@ -7,6 +7,8 @@ import (
 	httpmock "gopkg.in/jarcoal/httpmock.v1"
 )
 
+//Extended httpmock library to add responses with redirect.
+
 // NewRedirectResponder creates a Responder with an empty body, a 301 code,
 // and a location header.
 func NewRedirectResponder(location string) httpmock.Responder {
@@ -21,12 +23,4 @@ func NewRedirectResponse(location string) *http.Response {
 		StatusCode: 301,
 		Header:     http.Header{"Location": {location}},
 	}
-}
-
-func startMock() {
-	httpmock.Activate()
-}
-
-func endMock() {
-	httpmock.DeactivateAndReset()
 }

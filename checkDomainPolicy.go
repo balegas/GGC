@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
+//Access policy that checks if an URL is within a domain.
 //TODO: Does not accept subdomains
-
 type checkDomainPolicy struct {
 	domainNames []string
 }
@@ -20,7 +20,7 @@ func initCheckDomainPolicy(p *checkDomainPolicy, domainNames []string) {
 }
 
 func (p *checkDomainPolicy) checkURL(urlString string) bool {
-	// Not very efficient...
+	// TODO: avoid url.Parse.
 	parsedURL, _ := url.Parse(urlString)
 	for _, domain := range p.domainNames {
 		if strings.EqualFold(parsedURL.Hostname(), domain) {

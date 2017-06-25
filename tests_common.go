@@ -30,7 +30,8 @@ func setUpFakePage(pageLocation, pageFile string) {
 
 }
 
-func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string, duration time.Duration) crawler {
+func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string,
+	duration time.Duration) crawler {
 	c := newBasicCrawler()
 	p := newCheckDomainPolicy()
 	initCheckDomainPolicy(p, domainNames)
@@ -42,7 +43,8 @@ func newBasicCrawlerWithDomainPolicy(userAgent string, domainNames []string, dur
 	return c
 }
 
-func newProducerConsumerWithDomainPolicy(userAgent string, domainNames []string, duration time.Duration) crawler {
+func newProducerConsumerWithDomainPolicy(userAgent string, domainNames []string,
+	duration time.Duration) crawler {
 	c := newProducerConsumerCrawler()
 	p := newCheckDomainPolicy()
 	initCheckDomainPolicy(p, domainNames)
@@ -54,7 +56,8 @@ func newProducerConsumerWithDomainPolicy(userAgent string, domainNames []string,
 	return c
 }
 
-func newNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string, duration time.Duration) crawler {
+func newNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string,
+	duration time.Duration) crawler {
 	c := newNBatchesCrawler()
 	p := newCheckDomainPolicy()
 	initCheckDomainPolicy(p, domainNames)

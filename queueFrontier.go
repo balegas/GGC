@@ -1,7 +1,6 @@
 package main
 
-//
-
+// queueFrontier is FIFO.
 type queueFrontier struct {
 	urlQueue []interface{}
 }

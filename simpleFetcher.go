@@ -15,14 +15,15 @@ var errorRedirection = errors.New("Maximum redirections reached")
 var defaultMaxRedirection = 10
 
 type simpleFetcher struct {
-	rules           accessPolicyChecker
+	rules           accessPolicy
 	httpClient      *http.Client
 	ipAddress       net.IP
 	maxRedirections int
 }
 
-func defaultFetcher(rules accessPolicyChecker) simpleFetcher {
-	httpClient := &http.Client{CheckRedirect: func(req *http.Request, via []*http.Request) error {
+func defaultFetcher(rules accessPolicy) simpleFetcher {
+	httpClient := &http.Client{CheckRedirect: func(req *http.Request,
+		via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}}
 
@@ -30,8 +31,6 @@ func defaultFetcher(rules accessPolicyChecker) simpleFetcher {
 }
 
 func (f simpleFetcher) getURLContent(url *url.URL) (*http.Response, error) {
-	//convert url back to normal form in case it was transformed.
-
 	var err error
 	redirections := 0
 	nextLocation := url
