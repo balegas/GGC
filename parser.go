@@ -11,7 +11,12 @@ import (
 // Function to retrieve a list of attribute values in HTML5 tags.
 // Example: getAllTagAttr(map[string]string{"a": "href",}, File) retrieves
 // all values of attribute href for all "a" tags in the document.
-// TODO: Add support for multiple attributes -- not necessary for this exercise.
+
+// TODO: This parser implementation uses a html tokenizer. Alternatively, we could
+// use regex expressions. Need benchmarks to compare results.
+
+// TODO: It is potentially more efficient to return only new links. The design
+// of the code is less clear that way. Need benchmarks to evaluate benefits.
 func getAllTagAttr(tagAttr map[string]string, content io.Reader) []string {
 	var found []string
 	parser := html.NewTokenizer(content)

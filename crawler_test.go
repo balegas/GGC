@@ -8,8 +8,6 @@ import (
 	httpmock "gopkg.in/jarcoal/httpmock.v1"
 )
 
-//TODO: Compare results of different Crawlers.
-//TODO: Define test checks.
 func TestCrawlersMock(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
