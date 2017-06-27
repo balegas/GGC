@@ -13,6 +13,7 @@ type nBatchesCrawler struct {
 	crawlerInternals
 	maxWorkers  int
 	currWorkers int
+	bufferSize  int
 }
 
 func newNBatchesCrawler() *nBatchesCrawler {
@@ -21,10 +22,11 @@ func newNBatchesCrawler() *nBatchesCrawler {
 
 func initNBatchesCrawler(c *nBatchesCrawler, seed []string, fet fetcher,
 	rules accessPolicy, uf urlFrontier, duration time.Duration, s urlStore,
-	maxRoutines int, sm sitemap) {
+	maxRoutines int, bufferSize int, sm sitemap) {
 	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s, sm)
 	c.maxWorkers = maxRoutines
 	c.currWorkers = 0
+	c.bufferSize = bufferSize
 }
 
 // Spawns workers to crawl webpages while there are urls left in the frontier.
@@ -38,7 +40,7 @@ func initNBatchesCrawler(c *nBatchesCrawler, seed []string, fet fetcher,
 func (c *nBatchesCrawler) Crawl() (sitemap, error) {
 	foundURLs := 0
 
-	newURLsC := make(chan []string, urlChanBufferSize)
+	newURLsC := make(chan []string, c.bufferSize)
 	signalC := make(chan bool)
 
 	for (!c.frontier.isEmpty() || c.currWorkers != 0) && !c.isTimeout() {
@@ -71,7 +73,7 @@ func (c *nBatchesCrawler) Crawl() (sitemap, error) {
 
 func (c *nBatchesCrawler) spawnRoutines(newURLsC chan []string, signalC chan bool) {
 	for !c.frontier.isEmpty() && c.currWorkers < c.maxWorkers {
-		pendingURLsC := make(chan string, urlChanBufferSize)
+		pendingURLsC := make(chan string, c.bufferSize)
 		c.enqueueMultiple(pendingURLsC)
 		go c.processURLs(pendingURLsC, newURLsC, signalC)
 		c.currWorkers++

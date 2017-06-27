@@ -11,6 +11,7 @@ import (
 // was to to exercise the concurrency primitives of the language.
 type producerConsumerCrawler struct {
 	crawlerInternals
+	bufferSize int
 }
 
 func newProducerConsumerCrawler() *producerConsumerCrawler {
@@ -19,8 +20,9 @@ func newProducerConsumerCrawler() *producerConsumerCrawler {
 
 func initProducerConsumerCrawler(c *producerConsumerCrawler, seed []string,
 	fet fetcher, rules accessPolicy, uf urlFrontier,
-	duration time.Duration, s urlStore, sm sitemap) {
+	duration time.Duration, s urlStore, bufferSize int, sm sitemap) {
 	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s, sm)
+	c.bufferSize = bufferSize
 }
 
 // Crawl function reads and writes to frontier in isolation.
@@ -28,15 +30,14 @@ func (c *producerConsumerCrawler) Crawl() (sitemap, error) {
 	foundURLs := 0
 	finishedBatch := true
 
-	newURLsC := make(chan string, urlChanBufferSize)
+	newURLsC := make(chan string, c.bufferSize)
 	signalC := make(chan bool)
 
 	for (!c.frontier.isEmpty() || !finishedBatch) && !c.isTimeout() {
 
-		pendingURLsC := make(chan string, urlChanBufferSize)
+		pendingURLsC := make(chan string, c.bufferSize)
 		c.enqueueMultiple(pendingURLsC)
-		finishedBatch := false
-
+		finishedBatch = false
 		go c.processURLs(pendingURLsC, newURLsC, signalC)
 
 		// Wait for a batch to be complete before enqueueing new.
@@ -48,6 +49,7 @@ func (c *producerConsumerCrawler) Crawl() (sitemap, error) {
 				c.frontier.addURLString(curli)
 
 			case <-signalC:
+				log.Printf("SIGNAL %v", c.frontier.size())
 				finishedBatch = true
 			}
 		}

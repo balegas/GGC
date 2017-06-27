@@ -2,11 +2,10 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"io"
 	"log"
 	"os"
-	"strconv"
-	"time"
 )
 
 //TODO: Should mark header tags to avoid fetching those files
@@ -17,16 +16,29 @@ var crawlTags = map[string]string{
 	"a":      "href",
 }
 
-const urlChanBufferSize = 10
+const defaultDuration = 10
+const defaultOutputFile = "stdout"
+const defaultBufferSize = 10
+const defaultNumWorkers = 16
+const defaultStackSize = 1024
 
 func main() {
 
-	domainNames := os.Args[1 : len(os.Args)-2]
-	durationInt, _ := strconv.Atoi(os.Args[len(os.Args)-2])
-	duration := time.Duration(durationInt) * time.Second
-	outputFile := os.Args[len(os.Args)-1]
+	durationPointer := flag.Duration("d", defaultDuration, "Cralwing duration in seconds.")
+	outputFilePointer := flag.String("f", defaultOutputFile, "output file | stdout.")
+	workerBuffSizePointer := flag.Int("b", defaultBufferSize, "Worker input buffer size.")
+	numWorkersPointer := flag.Int("w", defaultNumWorkers, "Worker input buffer size.")
 
-	log.Printf("DomainNames: %v, duration: %v", domainNames, durationInt)
+	flag.Parse()
+
+	duration := *durationPointer
+	outputFile := *outputFilePointer
+	bufferSize := *workerBuffSizePointer
+	numWorkers := *numWorkersPointer
+	domainNames := flag.Args()
+
+	log.Printf("duration: %v, output: %v", duration, outputFile)
+	log.Printf("Args %v", flag.Args())
 
 	//c := newBasicCrawler()
 	//c := newProducerConsumerCrawler()
@@ -43,7 +55,7 @@ func main() {
 
 	//initBasicCrawler(c, domainNames, fe, p, fr, duration, s, sm)
 	//initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s, sm)
-	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, 4, sm)
+	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, numWorkers, bufferSize, sm)
 
 	result, _ := c.Crawl()
 
@@ -55,8 +67,7 @@ func main() {
 	} else {
 		file, err := os.Create(outputFile)
 		if err != nil {
-			log.Print("File cannot be created, output to stdout.")
-			f = os.Stdout
+			log.Fatal("Error opening file.")
 		} else {
 			f = file
 

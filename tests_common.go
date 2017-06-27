@@ -10,8 +10,6 @@ import (
 	httpmock "gopkg.in/jarcoal/httpmock.v1"
 )
 
-const defaultStackSize = 1024
-
 func readFileFromDisk(filename string) (io.Reader, error) {
 	bytesRead, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -62,7 +60,8 @@ func NewProducerConsumerWithDomainPolicy(userAgent string, domainNames []string,
 	sm := newOrderedTreeSitemap()
 
 	initOrderedTreeSitemap(sm)
-	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s, sm)
+	initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s,
+		defaultBufferSize, sm)
 	return c
 }
 
@@ -80,6 +79,7 @@ func NewNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string,
 	sm := newOrderedTreeSitemap()
 
 	initOrderedTreeSitemap(sm)
-	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, 4, sm)
+	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, defaultNumWorkers,
+		defaultBufferSize, sm)
 	return c
 }

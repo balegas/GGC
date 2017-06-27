@@ -49,8 +49,6 @@ func TestCrawlersMock(t *testing.T) {
 			t.Errorf("Number of URLs found does not match.")
 		}
 
-		log.Printf("%v", links)
-
 		for i, l := range links {
 			if l != domainURLs[i] {
 				t.Errorf("URL different from expected: %v C: %v, E: %v", i, l, domainURLs[i])
