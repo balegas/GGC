@@ -60,4 +60,5 @@ type sitemap interface {
 	addURL(curl string)
 	printSitemap(io.Writer)
 	numberOfLinks() int
+	getOrderedLinks() []string
 }

@@ -10,13 +10,11 @@ import (
 )
 
 //TODO: Should mark header tags to avoid fetching those files
+//TODO: Could also make Tag -> Array of attributes
 var crawlTags = map[string]string{
-	// Header tags
 	"link":   "href",
-	"script": "source",
-	// Body tags
-	"a": "href",
-	// others?
+	"script": "src",
+	"a":      "href",
 }
 
 const urlChanBufferSize = 10
