@@ -7,23 +7,23 @@ import (
 	rbt "github.com/emirpasic/gods/trees/redblacktree"
 )
 
-type OrderedTreeSitemap struct {
+type orderedTreeSitemap struct {
 	prefixTree *rbt.Tree
 }
 
-func newOrderedTreeSitemap() *OrderedTreeSitemap {
-	return &OrderedTreeSitemap{}
+func newOrderedTreeSitemap() *orderedTreeSitemap {
+	return &orderedTreeSitemap{}
 }
 
-func initOrderedTreeSitemap(s *OrderedTreeSitemap) {
+func initOrderedTreeSitemap(s *orderedTreeSitemap) {
 	s.prefixTree = rbt.NewWithStringComparator()
 }
 
-func (s *OrderedTreeSitemap) addURL(curl string) {
+func (s *orderedTreeSitemap) addURL(curl string) {
 	s.prefixTree.Put(curl, struct{}{})
 }
 
-func (s *OrderedTreeSitemap) printSitemap(out io.Writer) {
+func (s *orderedTreeSitemap) printSitemap(out io.Writer) {
 	var buffer bytes.Buffer
 	buffer.Write([]byte("<body>\n\t<ul>\n"))
 	for _, k := range s.prefixTree.Keys() {
@@ -39,7 +39,7 @@ func (s *OrderedTreeSitemap) printSitemap(out io.Writer) {
 
 }
 
-func (s *OrderedTreeSitemap) getOrderedLinks() []string {
+func (s *orderedTreeSitemap) getOrderedLinks() []string {
 	orderedKeys := make([]string, 0, s.prefixTree.Size())
 	for _, k := range s.prefixTree.Keys() {
 		orderedKeys = append(orderedKeys, k.(string))
@@ -47,6 +47,6 @@ func (s *OrderedTreeSitemap) getOrderedLinks() []string {
 	return orderedKeys
 }
 
-func (s *OrderedTreeSitemap) numberOfLinks() int {
+func (s *orderedTreeSitemap) numberOfLinks() int {
 	return s.prefixTree.Size()
 }
