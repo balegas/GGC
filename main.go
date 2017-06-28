@@ -17,7 +17,7 @@ var crawlTags = map[string]string{
 	"a":      "href",
 }
 
-const defaultDuration = 10
+const defaultDuration = 60 * time.Second
 const defaultOutputFile = "stdout"
 const defaultBufferSize = 10
 const defaultNumWorkers = 16
