@@ -1,18 +1,25 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
+	"time"
 )
 
-var errorFetching = errors.New("Error fetching URL")
-var errorDomain = errors.New("Reading outside domain")
-var errorRedirection = errors.New("Maximum redirections reached")
+//var errorFetching = errors.New("error fetching URL")
+//var errorDomain = errors.New("reading outside domain")
+//var errorRedirection = errors.New("maximum redirections reached")
+//var errorTooManyRequests = errors.New("error 429, Please throttle requests")
+//var errorOther = errors.New("other response code")
 
 var defaultMaxRedirection = 10
+var defaultTimeoutMillis = 5000
+
+var errorForbidden = -1
+var errorFetching = -2
+var errorMaxRedirections = -3
 
 type simpleFetcher struct {
 	rules           accessPolicy
@@ -22,7 +29,8 @@ type simpleFetcher struct {
 }
 
 func defaultFetcher(rules accessPolicy) simpleFetcher {
-	httpClient := &http.Client{CheckRedirect: func(req *http.Request,
+	timeout := time.Duration(defaultTimeoutMillis) * time.Millisecond
+	httpClient := &http.Client{Timeout: timeout, CheckRedirect: func(req *http.Request,
 		via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}}
@@ -30,52 +38,42 @@ func defaultFetcher(rules accessPolicy) simpleFetcher {
 	return simpleFetcher{rules, httpClient, nil, defaultMaxRedirection}
 }
 
-func (f simpleFetcher) getURLContent(url *url.URL) (*http.Response, error) {
-	var err error
+func (f simpleFetcher) getURLContent(url *url.URL) (*http.Response, int) {
 	redirections := 0
 	nextLocation := url
 	nextLocationCanonical, _ := getCanonicalURLString(nextLocation.String(), url)
 
 	if !f.rules.checkURL(nextLocationCanonical) {
-		log.Fatal("Should not try to get a forbidden url.")
+		log.Fatal("should never try to get a forbidden url")
 	}
 
 	for redirections < f.maxRedirections {
 		resp, eR := f.httpClient.Get(nextLocation.String())
 
 		if eR != nil {
-			err = errorFetching
-			break
+			return nil, errorFetching
 		}
 
 		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
 			location, _ := resp.Location()
 
+			// TODO: ONLY ACCEPTS status code 200. Must check other codes.
 			if !f.rules.checkURL(location.String()) {
-				err = errorDomain
-				break
-			} else {
-				redirections++
-				nextLocation = location
-				//log.Printf("Redirect to %v", nextLocation)
-				continue
+				return nil, errorForbidden
 			}
+			redirections++
+			nextLocation = location
+			continue
+		} else if resp.StatusCode == 200 {
+			return resp, 200
+		} else {
+			return nil, resp.StatusCode
 		}
-
-		// TODO: Need support for other codes?
-		if resp.StatusCode == 200 {
-			return resp, nil
-		}
-
-		if resp.StatusCode == 404 {
-			log.Printf("Error 404 %v", nextLocation)
-			err = errorFetching
-			break
-		}
-
 	}
 	if redirections >= f.maxRedirections {
-		err = errorRedirection
+		return nil, errorMaxRedirections
 	}
-	return nil, err
+
+	log.Fatal("should not enter here")
+	return nil, errorMaxRedirections
 }

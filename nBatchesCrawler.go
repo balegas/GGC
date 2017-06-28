@@ -14,6 +14,7 @@ type nBatchesCrawler struct {
 	maxWorkers  int
 	currWorkers int
 	bufferSize  int
+	workerTT    time.Duration
 }
 
 func newNBatchesCrawler() *nBatchesCrawler {
@@ -22,11 +23,12 @@ func newNBatchesCrawler() *nBatchesCrawler {
 
 func initNBatchesCrawler(c *nBatchesCrawler, seed []string, fet fetcher,
 	rules accessPolicy, uf urlFrontier, duration time.Duration, s urlStore,
-	maxRoutines int, bufferSize int, sm sitemap) {
+	maxRoutines int, bufferSize int, workerTT time.Duration, sm sitemap) {
 	initCommonAttributes(&c.crawlerInternals, seed, fet, rules, uf, duration, s, sm)
 	c.maxWorkers = maxRoutines
-	c.currWorkers = 0
 	c.bufferSize = bufferSize
+	c.workerTT = workerTT
+	c.currWorkers = 0
 }
 
 // Spawns workers to crawl webpages while there are urls left in the frontier.
@@ -40,8 +42,8 @@ func initNBatchesCrawler(c *nBatchesCrawler, seed []string, fet fetcher,
 func (c *nBatchesCrawler) Crawl() (sitemap, error) {
 	foundURLs := 0
 
-	newURLsC := make(chan []string, c.bufferSize)
-	signalC := make(chan bool)
+	newURLsC := make(chan []string, c.maxWorkers*c.bufferSize)
+	signalC := make(chan bool, c.maxWorkers)
 
 	for (!c.frontier.isEmpty() || c.currWorkers != 0) && !c.isTimeout() {
 
@@ -77,25 +79,19 @@ func (c *nBatchesCrawler) spawnRoutines(newURLsC chan []string, signalC chan boo
 		c.enqueueMultiple(pendingURLsC)
 		go c.processURLs(pendingURLsC, newURLsC, signalC)
 		c.currWorkers++
+
 	}
 }
 
 func (c *nBatchesCrawler) enqueueMultiple(pendingURLsC chan string) {
-	filled := false
-	for !c.frontier.isEmpty() && !filled {
+	count := 0
+	for !c.frontier.isEmpty() && count < c.bufferSize {
 		url, err := c.frontier.nextURLString()
 		if err != nil {
 			log.Fatal("Error dequeuing.")
 		}
-
-		select {
-		case pendingURLsC <- url:
-		default:
-			// Filled queue. Put value back and continue
-			c.frontier.addURLString(url)
-			filled = true
-
-		}
+		pendingURLsC <- url
+		count++
 	}
 	close(pendingURLsC)
 }
@@ -128,10 +124,9 @@ func (c *nBatchesCrawler) processURLs(pendingURLsC chan string,
 					}
 				}
 				newURLsC <- filteredCurl
-				log.Printf("Received %v URLS.", len(newURLs))
 			}
 		}
+		time.Sleep(c.workerTT)
 	}
-	log.Printf("BATCH RESULTS: VISITED: %v; FOUND: %v", visitedURLs, found)
 	signalC <- true
 }

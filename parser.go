@@ -44,6 +44,8 @@ func getCanonicalURLString(urlString string, parentURL *url.URL) (string, error)
 	//TODO: transform parameters to path segments; order arguments by index lex. order
 	//Full path
 
+	//TODO: process dots in paths...
+
 	//Remove Anchors #
 	lastIndexOf := strings.LastIndex(urlString, "#")
 	for lastIndexOf > 0 {

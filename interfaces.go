@@ -44,8 +44,9 @@ type accessPolicy interface {
 }
 
 // fetcher fetches urls using http protocol.
+// Error is an HTML response code, or a negative number (fetcher errors).
 type fetcher interface {
-	getURLContent(url *url.URL) (*http.Response, error)
+	getURLContent(url *url.URL) (*http.Response, int)
 }
 
 // Crawler has a minimal interface

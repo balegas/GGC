@@ -80,6 +80,6 @@ func NewNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string,
 
 	initOrderedTreeSitemap(sm)
 	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, defaultNumWorkers,
-		defaultBufferSize, sm)
+		defaultBufferSize, defaultWorkerThinkTime, sm)
 	return c
 }

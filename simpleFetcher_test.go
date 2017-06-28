@@ -77,7 +77,7 @@ func TestInfiniteRedirect(t *testing.T) {
 	urlA, _ := url.Parse(locationA)
 	_, err := f.getURLContent(urlA)
 
-	if err != errorRedirection {
+	if err != errorMaxRedirections {
 		t.Fail()
 	}
 }
@@ -98,7 +98,7 @@ func TestDifferentDomainRedirect(t *testing.T) {
 	urlA, _ := url.Parse(locationA)
 	_, err := f.getURLContent(urlA)
 
-	if err != errorDomain {
+	if err != errorForbidden {
 		t.Fail()
 	}
 }

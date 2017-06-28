@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 )
 
 //TODO: Should mark header tags to avoid fetching those files
@@ -21,10 +22,12 @@ const defaultOutputFile = "stdout"
 const defaultBufferSize = 10
 const defaultNumWorkers = 16
 const defaultStackSize = 1024
+const defaultWorkerThinkTime = 100 * time.Millisecond
 
 func main() {
 
 	durationPointer := flag.Duration("d", defaultDuration, "Cralwing duration in seconds.")
+	workerThinkTimePointer := flag.Duration("t", defaultWorkerThinkTime, "Default think time between requests.")
 	outputFilePointer := flag.String("f", defaultOutputFile, "output file | stdout.")
 	workerBuffSizePointer := flag.Int("b", defaultBufferSize, "Worker input buffer size.")
 	numWorkersPointer := flag.Int("w", defaultNumWorkers, "Worker input buffer size.")
@@ -35,6 +38,7 @@ func main() {
 	outputFile := *outputFilePointer
 	bufferSize := *workerBuffSizePointer
 	numWorkers := *numWorkersPointer
+	workerThinkTime := *workerThinkTimePointer
 	domainNames := flag.Args()
 
 	log.Printf("duration: %v, output: %v", duration, outputFile)
@@ -44,8 +48,8 @@ func main() {
 	//c := newProducerConsumerCrawler()
 	c := newNBatchesCrawler()
 
-	p := newCheckDomainPolicy()
-	initCheckDomainPolicy(p, domainNames)
+	p := newCheckSubDomainPolicy()
+	initCheckSubDomainPolicy(p, domainNames)
 
 	fe := defaultFetcher(p)
 	fr := newQueueFrontier(defaultStackSize)
@@ -55,7 +59,7 @@ func main() {
 
 	//initBasicCrawler(c, domainNames, fe, p, fr, duration, s, sm)
 	//initProducerConsumerCrawler(c, domainNames, fe, p, fr, duration, s, sm)
-	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, numWorkers, bufferSize, sm)
+	initNBatchesCrawler(c, domainNames, fe, p, fr, duration, s, numWorkers, bufferSize, workerThinkTime, sm)
 
 	result, _ := c.Crawl()
 

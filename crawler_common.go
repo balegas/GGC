@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/url"
@@ -62,9 +63,9 @@ func (c *crawlerInternals) isTimeout() bool {
 func (c *crawlerInternals) findURLLinksGetBody(url *url.URL) ([]string,
 	io.Reader, error) {
 	content, err := c.fetcher.getURLContent(url)
-	if err != nil {
-		log.Printf("error fetching content from url: %s : %s", url, err)
-		return nil, nil, err
+	if err != 200 {
+		log.Printf("Error fetching url: %v %v", url, err)
+		return nil, nil, fmt.Errorf("Error fetching %v: %v ", url, err)
 	}
 	return getAllTagAttr(crawlTags, content.Body), content.Body, nil
 }
