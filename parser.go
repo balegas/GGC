@@ -29,7 +29,8 @@ func getAllTagAttr(tagAttr map[string]string, content io.Reader) []string {
 		if searchAttr, ok := tagAttr[t.Data]; ok {
 			for _, a := range t.Attr {
 				if a.Key == searchAttr {
-					found = append(found, a.Val)
+					trimmed := strings.TrimSpace(a.Val)
+					found = append(found, trimmed)
 				}
 			}
 		}
