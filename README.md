@@ -7,7 +7,7 @@ It supports two modes for searching links. In **well behaved** mode, the crawler
 Current Version only support **aggressive** mode. To run type:
 
 ```bash
- go build && ./GGC -d=[DURATION] -f=[PATH_OUTPUT_FILE | stdout] -w=[NUM_WORKERS] -b=[BUFFER_SIZE] -t=[THINK_TIME] domain_name*
+ go build && ./GGC -d=[DURATION] -f=[PATH_OUTPUT_FILE | stdout] -w=[NUM_WORKERS] -b=[BUFFER_SIZE] -t=[THINK_TIME] [domain_name]+
 ```
 
 **NOTE**: The crawler will visit any url that has domain\_name as suffix. For example: sites.google.com or fakegoogle.com are allowed. A strict single-domain policy is also available.
