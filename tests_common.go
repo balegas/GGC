@@ -83,3 +83,20 @@ func NewNBatchesCrawlerWithDomainPolicy(userAgent string, domainNames []string,
 		defaultBufferSize, defaultWorkerThinkTime, sm)
 	return c
 }
+
+func NewSharedNothingCrawlerWithDomainPolicy(userAgent string, domainNames []string,
+	duration time.Duration) Crawler {
+	c := newSharedNothingCrawler()
+	p := newCheckDomainPolicy()
+	initCheckDomainPolicy(p, domainNames)
+
+	fe := defaultFetcher(p)
+	fr := newStackFrontier(defaultStackSize)
+	s := newInMemoryURLStore()
+	sm := newOrderedTreeSitemap()
+
+	initOrderedTreeSitemap(sm)
+	initSharedNothingCrawler(c, domainNames, fe, p, fr, duration, s, defaultNumWorkers,
+		defaultBufferSize, defaultWorkerThinkTime, sm)
+	return c
+}

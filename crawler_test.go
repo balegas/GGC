@@ -31,11 +31,13 @@ func TestCrawlersMock(t *testing.T) {
 
 	oneSeconds := time.Duration(1) * time.Second
 
-	bC := NewBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
-	pcC := NewProducerConsumerWithDomainPolicy("GGC", domainNames, oneSeconds)
-	nbC := NewNBatchesCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	//bC := NewBasicCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	//pcC := NewProducerConsumerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	//nbC := NewNBatchesCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
+	snC := NewSharedNothingCrawlerWithDomainPolicy("GGC", domainNames, oneSeconds)
 
-	C := []Crawler{bC, pcC, nbC}
+	//C := []Crawler{bC, pcC, nbC}
+	C := []Crawler{snC}
 
 	for _, c := range C {
 		sm, error := c.Crawl()
